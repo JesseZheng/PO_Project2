@@ -125,7 +125,8 @@ int main(int argc,char *argv[])
     ds.size = dataSize;
     ds.arr = dataset.arr;
     loadDataset(&ds,LOADFILE);
-    selectionSort(&ds);
+    // selectionSort(&ds);
+    insertionSort(&ds);
 
     printf(">>>>>>>>after sorting<<<<<<<<<<<<\n");
     for (int i = 0; i < dataSize; i++) {
