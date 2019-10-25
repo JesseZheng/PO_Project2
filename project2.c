@@ -11,8 +11,8 @@ int loadDataset(float* dataset, const char *filename, int datasetSize, int buffe
 {
     FILE *fp;
     fp = fopen(filename , "r");
-    for(int i=0; i < datasetSize; i++){
-        fread(dataset+i, bufferSize/sizeof(float), sizeof(float), fp);
+    for(int i=0; i < datasetSize; i+= bufferSize){
+        fread(dataset+i, sizeof(float), bufferSize, fp);
     }
     fclose(fp);
     return 0;
@@ -63,8 +63,8 @@ int writeDataset(float* dataset, const char *filename, int datasetSize, int buff
 {
     FILE *fp;
     fp = fopen(filename, "wb");
-    for(int i=0; i < datasetSize; i++){
-        fwrite(dataset+i, bufferSize/sizeof(float), sizeof(float), fp);
+    for(int i=0; i < datasetSize; i+= bufferSize){
+        fwrite(dataset+i, sizeof(float), bufferSize, fp);
         printf("%d:%f\n", i, dataset[i]);
     }
     fclose(fp);
@@ -135,11 +135,11 @@ int main(int argc,char *argv[])
     //generate random dataset and save it as .txt file
     float *ds = dataProducer(datasetSize);
     
-    // printf("original of dataset:\n");
+    printf("original of dataset:\n");
 
-    // for (int i = 0; i < datasetSize; i++) {
-    //     printf("%f\n",ds[i]);
-    // }
+    for (int i = 0; i < datasetSize; i++) {
+        printf("%f\n",ds[i]);
+    }
 
     writeDataset(ds, LOADFILE, datasetSize, bufferSize);
 
