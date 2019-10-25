@@ -3,6 +3,8 @@
 #include <time.h>
 #include <strings.h>
 
+const char SAVEFILE[] = "sorted";
+
 
 int cmp_float(const void* _a, const void* _b)
 {
@@ -116,14 +118,8 @@ float maxValue(float* dataset, int datasetSize)
 int main(int argc,char *argv[])
 {	
     float avg, max, min;
-    // The name of input dataset file
     char *loadfile;
-    // The name of output dataset file
-    char savefile[20];
     int datasetSize, bufferSize;
-    // Calucate the runtime
-    clock_t load_start, load_finish, stats_start, stats_finish, sort_start, sort_finish, write_start, write_finish;
-
 
     if (argc == 4) {
         datasetSize = atoi(argv[1]);
@@ -134,61 +130,39 @@ int main(int argc,char *argv[])
         printf("%s\n", "Usage: project2 <datasetSize> <bufferSize> <loadfile>");
         return -1;
     }
+    
+    // printf("original of dataset:\n");
+    // for (int i = 0; i < datasetSize; i++) {
+    //     printf("%f\n", ds[i]);
+    // }
 
-    // Generate the filename of output dataset 
-    strcpy(savefile, loadfile);
-    strcat(savefile, "_Sorted\0");
-
-    // The sorted dataset is declared
     float *dataSet= malloc((datasetSize)*sizeof(float));
 
-    printf("%s\n", "Loading..............");
-    load_start = clock();
     //load data to ds from saved file and sort
     loadDataset(dataSet, loadfile, datasetSize, bufferSize);
-    load_finish = clock();
 
-    stats_start = clock();
     // compute the avg of the dateset
     avg = average(dataSet, datasetSize);
+
     // find the max and min value in the dateset
     max = maxValue(dataSet, datasetSize);
     min = minValue(dataSet, datasetSize);
-    stats_finish = clock();
 
-    printf("%s\n", "Sorting..............");
-    sort_start = clock();
+    printf("sorting\n");
     // selectionSort(dataSet, datasetSize);
     insertionSort(dataSet, datasetSize);
     // quickSort(dataSet, datasetSize);
-    sort_finish = clock();
+
+    // printf("Result dataset:\n");
+    // for (int i = 0; i < datasetSize; i++) {
+    //     printf("%d: %f\n", i, dataSet[i]);
+    // }
 
 
-    printf("%s\n", "Writing..............");
-    write_start = clock();
+
+    printf("%s\n", "write");
     //save sorted dataset
-    writeDataset(dataSet, savefile, datasetSize, bufferSize, avg, min, max);
-    write_finish = clock();
-
-
-    double dur_load = (double)(load_finish-load_start)/CLOCKS_PER_SEC;
-    double dur_stats = (double)(stats_finish-stats_start)/CLOCKS_PER_SEC;
-    double dur_sort = (double)(sort_finish-sort_start)/CLOCKS_PER_SEC;
-    double dur_write = (double)(write_finish-write_start)/CLOCKS_PER_SEC;
-    double totoal_time = dur_load + dur_write + dur_sort + dur_stats;
-    double percent_load = dur_load/totoal_time*100.0;
-    double percent_stats = dur_stats/totoal_time*100.0;
-    double percent_sort = dur_sort/totoal_time*100.0;
-    double percent_write = dur_write/totoal_time*100.0;
-    
-    printf("----------------------------------------------\n");
-    printf( "Time to load data is: %f seconds %f%%\n", dur_load, percent_load);
-    printf( "Time to stats data is: %f seconds %f%%\n", dur_stats, percent_stats);
-    printf( "Time to sort data is: %f seconds %f%%\n", dur_sort, percent_sort);
-    printf( "Time to write data is: %f seconds %f%%\n", dur_write, percent_write);
-    printf("----------------------------------------------\n");
-    printf( "Totoal Time: %f seconds\n", totoal_time );
-
+    writeDataset(dataSet, SAVEFILE, datasetSize, bufferSize, avg, min, max);
 
     return 0;
 
