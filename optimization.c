@@ -119,7 +119,7 @@ int main(int argc,char *argv[])
     // The name of input dataset file
     char *loadfile;
     // The name of output dataset file
-    char savefile[20];
+    char savefile[256];
     int datasetSize, bufferSize;
     // Calucate the runtime
     clock_t load_start, load_finish, stats_start, stats_finish, sort_start, sort_finish, write_start, write_finish;

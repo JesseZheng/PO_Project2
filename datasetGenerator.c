@@ -33,7 +33,7 @@ int main(int argc,char *argv[])
     else
         datasetSize = 50;
 
-    char filename[20] = "Dataset";
+    char filename[256] = "Dataset";
     sprintf(filename, "%s%d", filename, datasetSize);
 
     //generate random dataset and save it as .txt file
