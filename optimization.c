@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <strings.h>
+#include <string.h>
 
 
 int cmp_float(const void* _a, const void* _b)
