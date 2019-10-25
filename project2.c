@@ -10,11 +10,24 @@ const char  SAVEFILE[] = "sorted.txt";
 int loadDataset(float* dataset, const char *filename, int datasetSize, int bufferSize) 
 {
     FILE *fp;
-    fp = fopen(filename , "r");
+    fp = fopen(filename , "rb");
     for(int i=0; i < datasetSize; i += bufferSize){
         if (bufferSize > datasetSize - i)
             bufferSize = datasetSize - i;
         fread(dataset+i, sizeof(float), bufferSize, fp);
+    }
+    fclose(fp);
+    return 0;
+}
+
+int writeDataset(float* dataset, const char *filename, int datasetSize, int bufferSize)
+{
+    FILE *fp;
+    fp = fopen(filename, "wb");
+    for(int i=0; i < datasetSize; i+= bufferSize){
+        if (bufferSize > datasetSize - i)
+            bufferSize = datasetSize - i;
+        fwrite(dataset+i, sizeof(float), bufferSize, fp);
     }
     fclose(fp);
     return 0;
@@ -56,21 +69,6 @@ void insertionSort(float *dataset, int datasetSize)
             }
             dataset[j+1] = key;
         }
-}
-
-
-int writeDataset(float* dataset, const char *filename, int datasetSize, int bufferSize)
-{
-    FILE *fp;
-    fp = fopen(filename, "wb");
-    for(int i=0; i < datasetSize; i+= bufferSize){
-        if (bufferSize > datasetSize - i)
-            bufferSize = datasetSize - i;
-        fwrite(dataset+i, sizeof(float), bufferSize, fp);
-        printf("%d:%f\n", i, dataset[i]);
-    }
-    fclose(fp);
-    return 0;
 }
 
 
@@ -138,9 +136,8 @@ int main(int argc,char *argv[])
     float *ds = dataProducer(datasetSize);
     
     printf("original of dataset:\n");
-
     for (int i = 0; i < datasetSize; i++) {
-        printf("%f\n",ds[i]);
+        printf("%f\n", ds[i]);
     }
 
     writeDataset(ds, LOADFILE, datasetSize, bufferSize);
@@ -162,26 +159,23 @@ int main(int argc,char *argv[])
     // selectionSort(dataSet, datasetSize);
     insertionSort(dataSet, datasetSize);
 
-    printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
-    printf("list of sorted data:\n");
     for(int i = datasetSize-1; i >= 0; i-- ){
         dataSet[i+3] = dataSet[i];
-        printf("%d: %f\n",i,dataSet[i]);
     }
 
     dataSet[0] = avg;
     dataSet[1] = max;
     dataSet[2] = min;
 
-
     datasetSize = datasetSize + 3;
+    
+    printf("Result dataset:\n");
+    for (int i = 0; i < datasetSize; i++) {
+        printf("%d: %f\n", i, dataSet[i]);
+    }
 
     //save sorted dataset
-    writeDataset(dataSet,SAVEFILE, datasetSize, bufferSize);
-    printf(">>>>>>>>result<<<<<<<<<<<<\n");
-    for (int i = 0; i < datasetSize; i++) {
-        printf("%d: %f\n",i+1, dataSet[i]);
-    }
+    writeDataset(dataSet, SAVEFILE, datasetSize, bufferSize);
 
     return 0;
 
