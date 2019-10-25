@@ -11,7 +11,9 @@ int loadDataset(float* dataset, const char *filename, int datasetSize, int buffe
 {
     FILE *fp;
     fp = fopen(filename , "r");
-    for(int i=0; i < datasetSize; i+= bufferSize){
+    for(int i=0; i < datasetSize; i += bufferSize){
+        if (bufferSize > datasetSize - i)
+            bufferSize = datasetSize - i;
         fread(dataset+i, sizeof(float), bufferSize, fp);
     }
     fclose(fp);
@@ -46,9 +48,7 @@ void insertionSort(float *dataset, int datasetSize)
         int i, j;
         float key;
         for (i=1; i<datasetSize; i++) {
-            printf("insertionSort\n");
             key = dataset[i];
-            printf("%f\n", key);
             j=i-1;
             while((j>=0) && (dataset[j]>key)) {
                     dataset[j+1] = dataset[j];
@@ -64,6 +64,8 @@ int writeDataset(float* dataset, const char *filename, int datasetSize, int buff
     FILE *fp;
     fp = fopen(filename, "wb");
     for(int i=0; i < datasetSize; i+= bufferSize){
+        if (bufferSize > datasetSize - i)
+            bufferSize = datasetSize - i;
         fwrite(dataset+i, sizeof(float), bufferSize, fp);
         printf("%d:%f\n", i, dataset[i]);
     }
