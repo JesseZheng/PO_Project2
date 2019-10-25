@@ -1,22 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <strings.h>
 
 const char  LOADFILE[] = "dataset.txt";
 const char  SAVEFILE[] = "sorted.txt";
 
-struct Array{
-    float *arr;
-    int size;
-}dataset,ds;   //dataset is for data generating, ds is for read/write operation.
 
-int loadDataset (struct Array *d, const char *filename) {
+int loadDataset(float* dataset, const char *filename, int datasetSize, int bufferSize) 
+{
     FILE *fp;
-    fp = fopen( filename , "r" );
-    for( int i=0; i < d->size; i++){
-        fread( d->arr+i, sizeof(float), 1, fp );
+    fp = fopen(filename , "r");
+    for(int i=0; i < datasetSize; i++){
+        fread(dataset+i, bufferSize/sizeof(float), sizeof(float), fp);
     }
-
     fclose(fp);
     return 0;
 }
@@ -28,49 +25,48 @@ void swap(float *xp, float *yp)
     *yp = temp;
 }
 
-void selectionSort(struct Array *d)
+void selectionSort(float *dataset, int datasetSize)
 {
     int i, j, min_idx;
     // One by one move boundary of unsorted subarray
-    for (int i = 0; i < d->size-1; i++)
+    for (int i = 0; i < datasetSize-1; i++)
     {
         // Find the minimum element in unsorted array
         min_idx = i;
-        for (int j = i+1; j < d->size; j++)
-            if (d->arr[j] < d->arr[min_idx])
+        for (int j = i+1; j < datasetSize; j++)
+            if (dataset[j] < dataset[min_idx])
                 min_idx = j;
         // Swap the found minimum element with the first element
-        swap(&d->arr[min_idx], &d->arr[i]);
+        swap(&dataset[min_idx], &dataset[i]);
     }
 }
 
-void insertionSort(struct Array *d)
+void insertionSort(float *dataset, int datasetSize)
 {
         int i, j;
         float key;
-        int len = d->size;
-        for (i=1;i<len;i++) {
-                key = d->arr[i];
-                j=i-1;
-                while((j>=0) && (d->arr[j]>key)) {
-                        d->arr[j+1] = d->arr[j];
-                        j--;
-                }
-                d->arr[j+1] = key;
+        for (i=1; i<datasetSize; i++) {
+            printf("insertionSort\n");
+            key = dataset[i];
+            printf("%f\n", key);
+            j=i-1;
+            while((j>=0) && (dataset[j]>key)) {
+                    dataset[j+1] = dataset[j];
+                    j--;
+            }
+            dataset[j+1] = key;
         }
 }
 
 
-int writeDataset (struct Array *d, const char *filename)
+int writeDataset(float* dataset, const char *filename, int datasetSize, int bufferSize)
 {
     FILE *fp;
-    char str[] = "just for test";
-    fp = fopen(filename, "w" );
-    for(int i=0; i < d->size; i++){
-        fwrite(d->arr+i, sizeof(float), 1, fp );
-        printf("write %f to file\n",*(d->arr+i));
+    fp = fopen(filename, "wb");
+    for(int i=0; i < datasetSize; i++){
+        fwrite(dataset+i, bufferSize/sizeof(float), sizeof(float), fp);
+        printf("%d:%f\n", i, dataset[i]);
     }
-    //fwrite(str, sizeof(char), 2, fp );
     fclose(fp);
     return 0;
 }
@@ -81,90 +77,108 @@ float *dataProducer(int DataSetSize)
     static float *v;
     v = malloc(DataSetSize * sizeof(float));
     srand(time(NULL));
-    printf("the generated data:\n");
+    // printf("the generated data:\n");
     for (int i = 0; i < DataSetSize; i++) {
         v[i] = 100*(float)rand()/(float)(RAND_MAX);
-        printf("%f\n",v[i]);
+        // printf("%f\n",v[i]);
     }
-    
     return v;
 }
 
 
-float average(struct Array d)
+float average(float* dataset, int datasetSize)
 {
     float avg, sum = 0;
-    for (int i = 0; i<d.size; i++){
-        sum = sum + d.arr[i];
+    for (int i = 0; i<datasetSize; i++){
+        sum = sum + dataset[i];
     }
-    avg = (float)sum/d.size;
+    avg = (float)sum/datasetSize;
     return avg;
+}
+
+float minValue(float* dataset, int datasetSize)
+{
+    float minValue = dataset[0];
+    for (int i = 1; i<datasetSize; i++){
+        if (dataset[i]<minValue)
+            minValue = dataset[i];
+    }
+    return minValue;
+}
+
+float maxValue(float* dataset, int datasetSize)
+{
+    float maxValue = dataset[0];
+    for (int i = 1; i<datasetSize; i++){
+        if (dataset[i]>maxValue)
+            maxValue = dataset[i];
+    }
+    return maxValue;
 }
 
 int main(int argc,char *argv[])
 {	
     printf("So far so good!\n");
     float avg, max, min;
-    int dataSize = atoi(argv[1]);
 
+    int datasetSize, bufferSize;
+
+    if (argc == 3) {
+        datasetSize = atoi(argv[1]);
+        bufferSize = atoi(argv[2]);
+    }
+    else {
+        datasetSize = 50;
+        bufferSize = 8;
+    }
 
     //generate random dataset and save it as .txt file
-    dataset.arr = dataProducer(dataSize);
-    dataset.size = dataSize;
+    float *ds = dataProducer(datasetSize);
     
-    printf("==========================\n");
-    printf("real value of dataset:\n");
+    // printf("original of dataset:\n");
 
-    for (int i = 0; i < dataSize; i++) {
-        printf("%f\n",dataset.arr[i]);
-    }
-    writeDataset(&dataset,LOADFILE);
-    printf("original size of dataset:%d\n",dataset.size);
+    // for (int i = 0; i < datasetSize; i++) {
+    //     printf("%f\n",ds[i]);
+    // }
+
+    writeDataset(ds, LOADFILE, datasetSize, bufferSize);
+
+    float dataSet[datasetSize];
 
     //load data to ds from saved file and sort
-    ds.size = dataSize;
-    ds.arr = dataset.arr;
-    loadDataset(&ds,LOADFILE);
-    // selectionSort(&ds);
-    insertionSort(&ds);
+    loadDataset(dataSet, LOADFILE, datasetSize, bufferSize);
 
-    printf(">>>>>>>>after sorting<<<<<<<<<<<<\n");
-    for (int i = 0; i < dataSize; i++) {
-        printf("%f\n",ds.arr[i]);
-    }
+    printf("sorting\n");
 
-    avg = average(ds);
-    int length = sizeof(ds.arr)/sizeof(float);
-    printf("current size of dataset: %d\n",length);
+    // compute the avg of the dateset
+    avg = average(dataSet, datasetSize);
 
-    max = ds.arr[dataSize-1];
-    min = ds.arr[0];
+    // find the max and min value in the dateset
+    max = maxValue(dataSet, datasetSize);
+    min = minValue(dataSet, datasetSize);
+
+    // selectionSort(dataSet, datasetSize);
+    insertionSort(dataSet, datasetSize);
 
     printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
     printf("list of sorted data:\n");
-    for(int i = dataSize-1; i >= 0; i-- ){
-        ds.arr[i+3] = ds.arr[i];
-        printf("%d: %f\n",i,ds.arr[i]);
+    for(int i = datasetSize-1; i >= 0; i-- ){
+        dataSet[i+3] = dataSet[i];
+        printf("%d: %f\n",i,dataSet[i]);
     }
 
-    ds.arr[0] = avg;
-    ds.arr[1] = max;
-    ds.arr[2] = min;
+    dataSet[0] = avg;
+    dataSet[1] = max;
+    dataSet[2] = min;
 
 
-    ds.size = ds.size + 3;
+    datasetSize = datasetSize + 3;
 
     //save sorted dataset
-    writeDataset(&ds,SAVEFILE);
+    writeDataset(dataSet,SAVEFILE, datasetSize, bufferSize);
     printf(">>>>>>>>result<<<<<<<<<<<<\n");
-    for (int i = 0; i < ds.size; i++) {
-        printf("%d: %f\n",i+1, ds.arr[i]);
-    }
-
-    loadDataset(&ds,SAVEFILE);
-    printf(">>>>>>>>check<<<<<<<<<<<<\n");
-    for (int i = 0; i < ds.size; i++) {
-        printf("%d: %f\n",i+1, ds.arr[i]);
+    for (int i = 0; i < datasetSize; i++) {
+        printf("%d: %f\n",i+1, dataSet[i]);
     }
 
     return 0;
