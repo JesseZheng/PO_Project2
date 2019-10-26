@@ -170,6 +170,7 @@ int main(int argc,char *argv[])
     writeDataset(dataSet, savefile, datasetSize, bufferSize, avg, min, max);
     write_finish = clock();
 
+    free(dataSet);
 
     double dur_load = (double)(load_finish-load_start)/CLOCKS_PER_SEC;
     double dur_stats = (double)(stats_finish-stats_start)/CLOCKS_PER_SEC;
